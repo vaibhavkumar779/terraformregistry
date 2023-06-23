@@ -44,14 +44,14 @@ jobs:
         name: "ModuleCreation"
 
       - script: |
-          tar cvfz ${{ parameters.TERRAFORM_MODULE_NAME }}.tar.gz ${{ parameters.TERRAFORM_MODULE_LOCATION }}/*
+          tar cvfz ${{ parameters.MODULE_NAME }}.tar.gz ${{ parameters.TERRAFORM_MODULE_LOCATION }}/*
           ls
         displayName: "Terraform Module Package Build"
         name: "PackageBuild"
       
       - script: |
-          export version_url="https://app.terraform.io/api/v2/organizations/$(TF_ORGANIZATION)/registry-modules/private/$(TF_ORGANIZATION)/${{ parameters.TERRAFORM_MODULE_NAME }}/${{ parameters.PROVIDER }}/versions"
+          export version_url="https://app.terraform.io/api/v2/organizations/$(TF_ORGANIZATION)/registry-modules/private/$(TF_ORGANIZATION)/${{ parameters.MODULE_NAME }}/${{ parameters.PROVIDER }}/versions"
           export push_url=$(curl --location {$version_url} --header 'Content-Type: application/vnd.api+json' --header 'Authorization: Bearer $(TERRAFORM_REGISTRY_TOKEN)' --data @${{ parameters.TERRAFORM_MODULE_VERSION }} | jq -r '.data.links.upload')
-          curl --location $push_url --request PUT  --header 'Content-Type: application/octet-stream'  --data-binary @${{ parameters.TERRAFORM_MODULE_NAME}}.tar.gz
+          curl --location $push_url --request PUT  --header 'Content-Type: application/octet-stream'  --data-binary @${{ parameters.MODULE_NAME}}.tar.gz
         displayName: "Package Push"
         name: "PackagePush"
