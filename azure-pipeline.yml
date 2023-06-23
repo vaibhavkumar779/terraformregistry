@@ -20,3 +20,4 @@ parameters:
     - name: MODULE_NAME
       displayName: "NameOfModuleInRegistry"
       default: "aks"
+      type: string
