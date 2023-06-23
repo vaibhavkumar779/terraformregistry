@@ -44,7 +44,7 @@ jobs:
         name: "ModuleCreation"
 
       - script: |
-          tar cvfz ${{ parameters.MODULE_NAME }}.tar.gz ${{ parameters.TERRAFORM_MODULE_LOCATION }}/*
+          tar cvfz ${{ parameters.MODULE_NAME }}.tar.gz ${{ parameters.TERRAFORM_PACKAGE_LOCATION }}/*
           ls
         displayName: "Terraform Module Package Build"
         name: "PackageBuild"
