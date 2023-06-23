@@ -1,1 +1,22 @@
+pool:
+  vmImage: 'ubuntu-latest'
 
+parameters:
+    - name: JSON_MODULE_LOCATION
+      displayName: "LocationOfJsonForModule"
+      type: string
+      default: "module.json"
+
+    - name: JSON_VERSION_LOCATION
+      displayName: "LocationOfJsonForVersion"
+      type: string
+      default: "module/version.json"
+    
+    - name: TERRAFORM_PACKAGE_LOCATION
+      displayName: "LocationOfPackage"
+      type: string
+      default: "module"
+    
+    - name: MODULE_NAME
+      displayName: "NameOfModuleInRegistry"
+      default: "aks"
