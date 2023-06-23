@@ -21,3 +21,9 @@ parameters:
       displayName: "NameOfModuleInRegistry"
       default: "aks"
       type: string
+
+    - name: PROVIDER
+      displayName: "TerraformCloudProvider"
+      type: string
+      default: "azurerm"
+
