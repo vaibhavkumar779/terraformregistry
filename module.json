@@ -1,1 +1,10 @@
-
+{
+  "data": {
+    "type": "registry-modules",
+    "attributes": {
+      "name": "aks",
+      "provider": "azurerm",
+      "registry-name": "private"
+    }
+  }
+}
