@@ -1,18 +1,57 @@
 pool:
   vmImage: 'ubuntu-latest'
 
-jobs:
-- job: BuildAndDeploy
-  steps:
-  - script: |
-      # Set a pipeline variable using ##vso[task.setvariable]
-      echo "##vso[task.setvariable variable=MyPipelineVariable]TheValueYouWantToSet"
-      
-      # Use the variable in the same job but a different step
-      echo "The value of MyPipelineVariable is $MyPipelineVariable"
-    displayName: 'Set and Use Variable in Step 1'
+parameters:
+    - name: JSON_MODULE_LOCATION
+      displayName: "LocationOfJsonForModule"
+      type: string
+      default: "module.json"
 
-  - script: |
-      # Use the variable in another step within the same job
-      echo "Using MyPipelineVariable in Step 2: $MyPipelineVariable"
-    displayName: 'Use Variable in Step 2'
+    - name: JSON_VERSION_LOCATION
+      displayName: "LocationOfJsonForVersion"
+      type: string
+      default: "module/version.json"
+    
+    - name: TERRAFORM_PACKAGE_LOCATION
+      displayName: "LocationOfPackage"
+      type: string
+      default: "module"
+    
+    - name: MODULE_NAME
+      displayName: "NameOfModuleInRegistry"
+      default: "aks"
+      type: string
+
+    - name: PROVIDER
+      displayName: "TerraformCloudProvider"
+      type: string
+      default: "azurerm"
+
+variables:
+
+- group: TerraformRegistryVariables
+
+jobs:
+  - job: "TerraformPackaging"
+    steps:
+      - checkout: self
+        displayName: Clean Checkout
+        clean: true
+
+      - script: |
+          curl  --header "Authorization: Bearer $(TERRAFORM_REGISTRY_TOKEN)" --header "Content-Type: application/vnd.api+json" --request POST --data @${{ parameters.JSON_MODULE_LOCATION }}  https://app.terraform.io/api/v2/organizations/$(TF_ORGANIZATION)/registry-modules | jq -r
+        displayName: "Terraform Registry Module Creation"
+        name: "ModuleCreation"
+
+      - script: |
+          tar cvfz ${{ parameters.MODULE_NAME }}.tar.gz ${{ parameters.TERRAFORM_PACKAGE_LOCATION }}/*
+          ls
+        displayName: "Terraform Module Package Build"
+        name: "PackageBuild"
+      
+      - script: |
+          export version_url="https://app.terraform.io/api/v2/organizations/$(TF_ORGANIZATION)/registry-modules/private/$(TF_ORGANIZATION)/${{ parameters.MODULE_NAME }}/${{ parameters.PROVIDER }}/versions"
+          export push_url=$(curl --location {$version_url} --header 'Content-Type: application/vnd.api+json' --header 'Authorization: Bearer $(TERRAFORM_REGISTRY_TOKEN)' --data @${{ parameters.JSON_VERSION_LOCATION }} | jq -r '.data.links.upload')
+          curl --location $push_url --request PUT  --header 'Content-Type: application/octet-stream'  --data-binary @${{ parameters.MODULE_NAME}}.tar.gz
+        displayName: "Package Push"
+        name: "PackagePush"
